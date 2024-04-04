@@ -19,20 +19,27 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Texture loading
-        const textureLoader = new THREE.TextureLoader();
-        const platformTexture = textureLoader.load('https://threejs.org/examples/textures/wood.jpg');
-        const characterTexture = textureLoader.load('https://threejs.org/examples/textures/uv_grid_opengl.jpg');
+        // Create a background
+        const backgroundTexture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/cube/skybox/sky.jpg');
+        scene.background = backgroundTexture;
+
+        // Create a playable space
+        const floorGeometry = new THREE.PlaneGeometry(100, 100);
+        const floorMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide });
+        const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.rotation.x = Math.PI / 2; // Rotate to make it horizontal
+        scene.add(floor);
 
         // Create a platform
         const platformGeometry = new THREE.BoxGeometry(10, 1, 10);
-        const platformMaterial = new THREE.MeshBasicMaterial({ map: platformTexture });
+        const platformMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
         const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+        platform.position.y = 0.5; // Place it slightly above the floor
         scene.add(platform);
 
         // Create a character
         const characterGeometry = new THREE.BoxGeometry(1, 1, 1);
-        const characterMaterial = new THREE.MeshBasicMaterial({ map: characterTexture });
+        const characterMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
         const character = new THREE.Mesh(characterGeometry, characterMaterial);
         character.position.y = 5; // Start the character above the platform
         scene.add(character);
@@ -72,6 +79,10 @@
         }
 
         animate();
+
+        // Adjust camera position
+        camera.position.set(0, 10, 20);
+        camera.lookAt(0, 0, 0);
 
         // Key handling
         const Key = {

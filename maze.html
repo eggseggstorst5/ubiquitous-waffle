@@ -203,20 +203,32 @@
         if (keyDownEvent) {
             switch (keyDownEvent.key) {
                 case "ArrowUp":
-                    movePlayer("up");
+                    if (!isWall(playerPos.row - 1, playerPos.col)) {
+                        movePlayer("up");
+                    }
                     break;
                 case "ArrowDown":
-                    movePlayer("down");
+                    if (!isWall(playerPos.row + 1, playerPos.col)) {
+                        movePlayer("down");
+                    }
                     break;
                 case "ArrowLeft":
-                    movePlayer("left");
+                    if (!isWall(playerPos.row, playerPos.col - 1)) {
+                        movePlayer("left");
+                    }
                     break;
                 case "ArrowRight":
-                    movePlayer("right");
+                    if (!isWall(playerPos.row, playerPos.col + 1)) {
+                        movePlayer("right");
+                    }
                     break;
             }
             requestAnimationFrame(handleKeyPress);
         }
+    }
+
+    function isWall(row, col) {
+        return row < 0 || row >= ROWS || col < 0 || col >= COLS || maze[row][col].classList.contains("wall");
     }
 
     // Start the game

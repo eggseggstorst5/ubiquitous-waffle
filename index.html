@@ -28,74 +28,34 @@
         const track = new THREE.Group();
         const trackLength = 500;
         const trackWidth = 10;
+        const randomOffset = 2; // Maximum random offset from the center
         for (let i = 0; i < trackLength; i++) {
-            const geometry = new THREE.BoxGeometry(trackWidth, 0.1, 2);
+            const geometry = new THREE.BoxGeometry(trackWidth + Math.random() * randomOffset * 2, 0.1, 2);
             const material = new THREE.MeshBasicMaterial({ color: 0x808080 });
             const cube = new THREE.Mesh(geometry, material);
             cube.position.z = -i * 2;
-            cube.position.x = Math.sin(i * 0.1) * 20;
+            cube.position.x = Math.sin(i * 0.1) * 20 + (Math.random() - 0.5) * randomOffset * 2;
             track.add(cube);
         }
         scene.add(track);
 
-        // Create a car mesh
-        const geometry = new THREE.BoxGeometry(1, 0.5, 2);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const car = new THREE.Mesh(geometry, material);
-        scene.add(car);
-
-        // Set initial position and rotation of the car
-        car.position.z = -50;
-        let velocity = 0;
+        // Create player car
+        const playerCarGeometry = new THREE.BoxGeometry(1, 0.5, 2);
+        const playerCarMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const playerCar = new THREE.Mesh(playerCarGeometry, playerCarMaterial);
+        playerCar.position.z = -50; // Start position
+        scene.add(playerCar);
 
         // Set initial camera position
         camera.position.set(0, 10, 0);
         camera.lookAt(0, 0, -100);
 
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // Key state object to track pressed keys
-        const keys = {};
-
-        // Handle keydown and keyup events
-        window.addEventListener('keydown', (event) => {
-            keys[event.code] = true;
-        });
-        window.addEventListener('keyup', (event) => {
-            keys[event.code] = false;
-        });
-
         // Update function for rendering the scene
         const update = () => {
             requestAnimationFrame(update);
 
-            // Update car position and rotation based on key state
-            if (keys['ArrowUp']) {
-                velocity += 0.01; // Accelerate when the up arrow is pressed
-            } else {
-                velocity *= 0.98; // Apply friction when no keys are pressed
-            }
-            if (keys['ArrowDown']) {
-                velocity -= 0.005; // Slow down when the down arrow is pressed
-            }
-            if (keys['ArrowLeft']) {
-                car.rotation.y += 0.05;
-            }
-            if (keys['ArrowRight']) {
-                car.rotation.y -= 0.05;
-            }
-
-            // Limit car's speed
-            velocity = Math.min(Math.max(velocity, 0), 0.2);
-
-            // Update car position based on velocity and rotation
-            car.position.z -= velocity * Math.cos(car.rotation.y);
-            car.position.x -= velocity * Math.sin(car.rotation.y);
+            // Move player car along the track
+            playerCar.position.z -= 0.1;
 
             // Prevent the car from going out of bounds (track boundaries)
             const trackBounds = {
@@ -104,13 +64,13 @@
                 minZ: -trackLength * 2,
                 maxZ: 0
             };
-            car.position.x = Math.min(Math.max(car.position.x, trackBounds.minX), trackBounds.maxX);
-            car.position.z = Math.min(Math.max(car.position.z, trackBounds.minZ), trackBounds.maxZ);
+            playerCar.position.x = Math.min(Math.max(playerCar.position.x, trackBounds.minX), trackBounds.maxX);
+            playerCar.position.z = Math.min(Math.max(playerCar.position.z, trackBounds.minZ), trackBounds.maxZ);
 
-            // Update camera position to follow the car
-            camera.position.z = car.position.z + 10;
-            camera.position.x = car.position.x;
-            camera.lookAt(car.position);
+            // Update camera position to follow the player car
+            camera.position.z = playerCar.position.z + 10;
+            camera.position.x = playerCar.position.x;
+            camera.lookAt(playerCar.position);
 
             renderer.render(scene, camera);
         };

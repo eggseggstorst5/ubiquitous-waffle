@@ -40,9 +40,9 @@
         background-image: url('https://emojicdn.elk.sh/🤖');
         background-size: cover;
     }
-    .obstacle {
+    .enemy {
         background-color: #ff0000;
-        background-image: url('https://emojicdn.elk.sh/🚧');
+        background-image: url('https://emojicdn.elk.sh/👾');
         background-size: cover;
     }
     h1 {
@@ -56,19 +56,19 @@
 </head>
 <body>
 <h1>Maze Game</h1>
-<p>Use arrow keys to navigate. Avoid moving obstacles and find the exit!</p>
+<p>Use arrow keys to navigate. Avoid enemies and find the exit!</p>
 <div class="maze-container">
     <div class="maze" id="maze"></div>
 </div>
 <script>
     const ROWS = 15;
     const COLS = 15;
-    const NUM_OBSTACLES = 5;
-    const OBSTACLE_INTERVAL = 1000;
+    const NUM_ENEMIES = 3;
+    const WALL_DENSITY = 0.3;
 
     let maze = [];
     let playerPos = { row: 0, col: 0 };
-    let obstacles = [];
+    let enemies = [];
 
     function createMaze() {
         let mazeDiv = document.getElementById("maze");
@@ -85,73 +85,64 @@
             maze.push(row);
         }
 
-        // Generate maze using depth-first search with backtracking
-        let stack = [];
-        let startX = Math.floor(Math.random() * ROWS);
-        let startY = Math.floor(Math.random() * COLS);
-        stack.push({ row: startX, col: startY });
-
-        while (stack.length > 0) {
-            let current = stack.pop();
-            let row = current.row;
-            let col = current.col;
-            maze[row][col].classList.remove("wall");
-
-            let directions = [{ row: row - 1, col: col }, { row: row + 1, col: col }, { row: row, col: col - 1 }, { row: row, col: col + 1 }];
-            directions = directions.sort(() => Math.random() - 0.5);
-
-            for (let dir of directions) {
-                let newRow = dir.row;
-                let newCol = dir.col;
-                if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS && maze[newRow][newCol].classList.contains("wall")) {
-                    stack.push({ row: newRow, col: newCol });
-                }
-            }
-        }
+        // Generate maze using recursive backtracking
+        let startRow = Math.floor(Math.random() * ROWS);
+        let startCol = Math.floor(Math.random() * COLS);
+        maze[startRow][startCol].classList.remove("wall");
+        maze[startRow][startCol].classList.add("path");
+        recursiveBacktracking(startRow, startCol);
 
         // Set exit
+        maze[ROWS - 1][COLS - 1].classList.remove("wall");
         maze[ROWS - 1][COLS - 1].classList.add("exit");
 
         // Set player position
         maze[playerPos.row][playerPos.col].classList.add("player");
 
-        // Create obstacles
-        for (let i = 0; i < NUM_OBSTACLES; i++) {
-            let obstacle = { row: Math.floor(Math.random() * ROWS), col: Math.floor(Math.random() * COLS) };
-            obstacles.push(obstacle);
-            maze[obstacle.row][obstacle.col].classList.add("obstacle");
+        // Create enemies
+        for (let i = 0; i < NUM_ENEMIES; i++) {
+            let enemy = { row: Math.floor(Math.random() * ROWS), col: Math.floor(Math.random() * COLS) };
+            enemies.push(enemy);
+            maze[enemy.row][enemy.col].classList.add("enemy");
         }
     }
 
-    function moveObstacles() {
-        for (let obstacle of obstacles) {
-            let newRow = obstacle.row;
-            let newCol = obstacle.col;
-            let directions = ["up", "down", "left", "right"];
-            let direction = directions[Math.floor(Math.random() * directions.length)];
+    function recursiveBacktracking(row, col) {
+        let directions = shuffleDirections();
 
-            switch (direction) {
-                case "up":
-                    newRow--;
-                    break;
-                case "down":
-                    newRow++;
-                    break;
-                case "left":
-                    newCol--;
-                    break;
-                case "right":
-                    newCol++;
-                    break;
+        for (let dir of directions) {
+            let newRow = row + dir[0] * 2;
+            let newCol = col + dir[1] * 2;
+
+            if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS && maze[newRow][newCol].classList.contains("wall")) {
+                maze[row + dir[0]][col + dir[1]].classList.remove("wall");
+                maze[newRow][newCol].classList.remove("wall");
+                recursiveBacktracking(newRow, newCol);
             }
+        }
+    }
+
+    function shuffleDirections() {
+        let directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+        for (let i = directions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [directions[i], directions[j]] = [directions[j], directions[i]];
+        }
+        return directions;
+    }
+
+    function moveEnemies() {
+        for (let enemy of enemies) {
+            let newRow = enemy.row + Math.floor(Math.random() * 3) - 1;
+            let newCol = enemy.col + Math.floor(Math.random() * 3) - 1;
 
             if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS &&
                 !maze[newRow][newCol].classList.contains("wall") &&
-                !maze[newRow][newCol].classList.contains("obstacle")) {
-                maze[obstacle.row][obstacle.col].classList.remove("obstacle");
-                obstacle.row = newRow;
-                obstacle.col = newCol;
-                maze[obstacle.row][obstacle.col].classList.add("obstacle");
+                !maze[newRow][newCol].classList.contains("enemy")) {
+                maze[enemy.row][enemy.col].classList.remove("enemy");
+                enemy.row = newRow;
+                enemy.col = newCol;
+                maze[enemy.row][enemy.col].classList.add("enemy");
             }
         }
     }
@@ -177,7 +168,7 @@
 
         if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS &&
             !maze[newRow][newCol].classList.contains("wall") &&
-            !maze[newRow][newCol].classList.contains("obstacle")) {
+            !maze[newRow][newCol].classList.contains("enemy")) {
             maze[playerPos.row][playerPos.col].classList.remove("player");
             playerPos.row = newRow;
             playerPos.col = newCol;
@@ -193,7 +184,7 @@
     function resetGame() {
         maze = [];
         playerPos = { row: 0, col: 0 };
-        obstacles = [];
+        enemies = [];
         document.getElementById("maze").innerHTML = "";
         createMaze();
     }
@@ -202,21 +193,25 @@
         switch (event.key) {
             case "ArrowUp":
                 movePlayer("up");
+                moveEnemies();
                 break;
             case "ArrowDown":
                 movePlayer("down");
+                moveEnemies();
                 break;
             case "ArrowLeft":
                 movePlayer("left");
+                moveEnemies();
                 break;
             case "ArrowRight":
                 movePlayer("right");
+                moveEnemies();
                 break;
         }
     });
 
+    // Start the game
     createMaze();
-    setInterval(moveObstacles, OBSTACLE_INTERVAL);
 </script>
 </body>
 </html>

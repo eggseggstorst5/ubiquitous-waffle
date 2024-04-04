@@ -26,14 +26,14 @@
 
         // Create a track
         const track = new THREE.Group();
-        const trackLength = 100;
-        const trackWidth = 5;
+        const trackLength = 500;
+        const trackWidth = 10;
         for (let i = 0; i < trackLength; i++) {
             const geometry = new THREE.BoxGeometry(trackWidth, 0.1, 2);
             const material = new THREE.MeshBasicMaterial({ color: 0x808080 });
             const cube = new THREE.Mesh(geometry, material);
             cube.position.z = -i * 2;
-            cube.position.x = Math.sin(i * 0.1) * 10;
+            cube.position.x = Math.sin(i * 0.1) * 20;
             track.add(cube);
         }
         scene.add(track);
@@ -45,11 +45,11 @@
         scene.add(car);
 
         // Set initial position and rotation of the car
-        car.position.z = -5;
+        car.position.z = -50;
 
         // Set initial camera position
-        camera.position.set(0, 5, 0);
-        camera.lookAt(0, 0, -10);
+        camera.position.set(0, 10, 0);
+        camera.lookAt(0, 0, -100);
 
         // Handle window resize
         window.addEventListener('resize', () => {
@@ -75,10 +75,14 @@
 
             // Update car position and rotation based on key state
             if (keys['ArrowUp']) {
-                car.position.z -= 0.1;
+                const angle = car.rotation.y;
+                car.position.z -= Math.cos(angle) * 0.1;
+                car.position.x -= Math.sin(angle) * 0.1;
             }
             if (keys['ArrowDown']) {
-                car.position.z += 0.1;
+                const angle = car.rotation.y;
+                car.position.z += Math.cos(angle) * 0.1;
+                car.position.x += Math.sin(angle) * 0.1;
             }
             if (keys['ArrowLeft']) {
                 car.rotation.y += 0.05;
@@ -88,13 +92,13 @@
             }
 
             // Prevent the car from going out of bounds
-            const maxX = 5;
-            const maxZ = 5;
+            const maxX = 10;
+            const maxZ = 50;
             car.position.x = Math.min(Math.max(car.position.x, -maxX), maxX);
             car.position.z = Math.min(Math.max(car.position.z, -trackLength * 2), maxZ);
 
             // Update camera position to follow the car
-            camera.position.z = car.position.z + 5;
+            camera.position.z = car.position.z + 10;
             camera.position.x = car.position.x;
             camera.lookAt(car.position);
 
@@ -106,3 +110,4 @@
     </script>
 </body>
 </html>
+

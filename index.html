@@ -63,6 +63,23 @@ h1 {
   color: #ff4136;
   margin-top: 20px;
 }
+
+.restart-button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.restart-button:hover {
+  background-color: #45a049;
+}
 </style>
 </head>
 <body>
@@ -70,11 +87,13 @@ h1 {
   <h1>Minesweeper</h1>
   <div class="grid" id="grid"></div>
   <div class="game-over-message" id="game-over-message"></div>
+  <button class="restart-button" id="restart-button">Restart</button>
 </div>
 
 <script>
 const grid = document.getElementById('grid');
 const gameOverMessage = document.getElementById('game-over-message');
+const restartButton = document.getElementById('restart-button');
 const rows = 10;
 const cols = 10;
 const mines = 20;
@@ -144,6 +163,7 @@ function handleClick(event) {
       revealBoard();
       gameOverMessage.textContent = 'Game Over!';
       gameOverMessage.style.display = 'block';
+      restartButton.style.display = 'block';
     } else {
       if (board[row][col].count === 0) {
         expand(row, col);
@@ -203,8 +223,18 @@ function checkWin() {
     revealBoard();
     gameOverMessage.textContent = 'You Win!';
     gameOverMessage.style.display = 'block';
+    restartButton.style.display = 'block';
   }
 }
+
+function restartGame() {
+  initializeBoard();
+  renderBoard();
+  gameOverMessage.style.display = 'none';
+  restartButton.style.display = 'none';
+}
+
+restartButton.addEventListener('click', restartGame);
 
 initializeBoard();
 renderBoard();

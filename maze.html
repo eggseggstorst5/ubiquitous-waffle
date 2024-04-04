@@ -64,7 +64,6 @@
     const ROWS = 15;
     const COLS = 15;
     const NUM_ENEMIES = 3;
-    const WALL_DENSITY = 0.3;
 
     let maze = [];
     let playerPos = { row: 0, col: 0 };
@@ -86,15 +85,19 @@
         }
 
         // Generate maze using recursive backtracking
-        let startRow = Math.floor(Math.random() * ROWS);
-        let startCol = Math.floor(Math.random() * COLS);
+        let startRow, startCol, endRow, endCol;
+        do {
+            startRow = Math.floor(Math.random() * ROWS);
+            startCol = Math.floor(Math.random() * COLS);
+            endRow = Math.floor(Math.random() * ROWS);
+            endCol = Math.floor(Math.random() * COLS);
+        } while (startRow === endRow || startCol === endCol);
+
         maze[startRow][startCol].classList.remove("wall");
         maze[startRow][startCol].classList.add("path");
+        maze[endRow][endCol].classList.remove("wall");
+        maze[endRow][endCol].classList.add("exit");
         recursiveBacktracking(startRow, startCol);
-
-        // Set exit
-        maze[ROWS - 1][COLS - 1].classList.remove("wall");
-        maze[ROWS - 1][COLS - 1].classList.add("exit");
 
         // Set player position
         maze[playerPos.row][playerPos.col].classList.add("player");

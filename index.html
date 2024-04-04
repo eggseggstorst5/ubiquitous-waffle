@@ -24,6 +24,20 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
+        // Create a track
+        const track = new THREE.Group();
+        const trackLength = 100;
+        const trackWidth = 5;
+        for (let i = 0; i < trackLength; i++) {
+            const geometry = new THREE.BoxGeometry(trackWidth, 0.1, 2);
+            const material = new THREE.MeshBasicMaterial({ color: 0x808080 });
+            const cube = new THREE.Mesh(geometry, material);
+            cube.position.z = -i * 2;
+            cube.position.x = Math.sin(i * 0.1) * 10;
+            track.add(cube);
+        }
+        scene.add(track);
+
         // Create a car mesh
         const geometry = new THREE.BoxGeometry(1, 0.5, 2);
         const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
@@ -32,6 +46,10 @@
 
         // Set initial position of the car
         car.position.z = -5;
+
+        // Set initial camera position
+        camera.position.set(0, 5, 0);
+        camera.lookAt(0, 0, -10);
 
         // Handle window resize
         window.addEventListener('resize', () => {
@@ -73,7 +91,12 @@
             const maxX = 5;
             const maxZ = 5;
             car.position.x = Math.min(Math.max(car.position.x, -maxX), maxX);
-            car.position.z = Math.min(Math.max(car.position.z, -maxZ), maxZ);
+            car.position.z = Math.min(Math.max(car.position.z, -trackLength * 2), maxZ);
+
+            // Update camera position to follow the car
+            camera.position.z = car.position.z + 5;
+            camera.position.x = car.position.x;
+            camera.lookAt(car.position);
 
             renderer.render(scene, camera);
         };
@@ -83,3 +106,4 @@
     </script>
 </body>
 </html>
+

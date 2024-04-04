@@ -23,6 +23,10 @@
   .cell:hover {
     background-color: #ddd;
   }
+  .mine {
+    background-color: #ff4136;
+    color: #fff;
+  }
 </style>
 </head>
 <body>
@@ -112,6 +116,10 @@
     const cell = grid.querySelector(`[data-row="${row}"][data-col="${col}"]`);
     cell.textContent = board[row][col].count === 0 ? '' : board[row][col].count;
     cell.style.backgroundColor = '#fff';
+    if (board[row][col].isMine) {
+      cell.classList.add('mine');
+      cell.innerHTML = '&#128163;'; // Bomb emoji
+    }
   }
 
   function expand(row, col) {
@@ -160,4 +168,3 @@
 </script>
 </body>
 </html>
-

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doom-like Shooter</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Player properties
+    let player = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+      radius: 15,
+      speed: 5
+    };
+
+    // Enemy properties
+    let enemies = [];
+
+    // Handle keyboard input
+    const keys = {};
+    window.addEventListener('keydown', e => {
+      keys[e.key] = true;
+    });
+    window.addEventListener('keyup', e => {
+      keys[e.key] = false;
+    });
+
+    // Update game state
+    function update() {
+      // Move player
+      if (keys['ArrowLeft'] && player.x > player.radius) {
+        player.x -= player.speed;
+      }
+      if (keys['ArrowRight'] && player.x < canvas.width - player.radius) {
+        player.x += player.speed;
+      }
+      if (keys['ArrowUp'] && player.y > player.radius) {
+        player.y -= player.speed;
+      }
+      if (keys['ArrowDown'] && player.y < canvas.height - player.radius) {
+        player.y += player.speed;
+      }
+
+      // Move enemies
+      enemies.forEach(enemy => {
+        enemy.x += (player.x - enemy.x) * 0.01;
+        enemy.y += (player.y - enemy.y) * 0.01;
+      });
+
+      // Check for collisions with enemies
+      enemies.forEach((enemy, index) => {
+        const dx = player.x - enemy.x;
+        const dy = player.y - enemy.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        if (distance < player.radius + enemy.radius) {
+          // Player collided with an enemy
+          gameOver();
+        }
+      });
+
+      // Redraw canvas
+      draw();
+
+      // Call update again
+      requestAnimationFrame(update);
+    }
+
+    // Draw everything
+    function draw() {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw player
+      ctx.fillStyle = 'blue';
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw enemies
+      ctx.fillStyle = 'red';
+      enemies.forEach(enemy => {
+        ctx.beginPath();
+        ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    // Game over function
+    function gameOver() {
+      alert('Game Over!');
+      // You can add more actions here like resetting the game or showing a game over screen.
+    }
+
+    // Create initial enemies
+    function createEnemies() {
+      for (let i = 0; i < 5; i++) {
+        const enemy = {
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: 10
+        };
+        enemies.push(enemy);
+      }
+    }
+    createEnemies();
+
+    // Start the game loop
+    update();
+  </script>
+</body>
+</html>

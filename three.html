@@ -20,7 +20,7 @@
         document.body.appendChild(renderer.domElement);
 
         // Create a background
-        const backgroundTexture = new THREE.TextureLoader().load('https://threejs.org/examples/textures/cube/skybox/sky.jpg');
+        const backgroundTexture = new THREE.TextureLoader().load('textures/sky.jpg', onLoad, onProgress, onError);
         scene.background = backgroundTexture;
 
         // Create a playable space
@@ -107,6 +107,19 @@
 
         window.addEventListener('keydown', function(event) { Key.onKeyDown(event); }, false);
         window.addEventListener('keyup', function(event) { Key.onKeyUp(event); }, false);
+
+        // Texture loading callbacks
+        function onLoad(texture) {
+            console.log('Texture loaded successfully.');
+        }
+
+        function onProgress(xhr) {
+            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+        }
+
+        function onError(err) {
+            console.error('An error occurred while loading the texture:', err);
+        }
     </script>
 </body>
 </html>

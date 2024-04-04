@@ -40,11 +40,6 @@
         background-image: url('https://emojicdn.elk.sh/🤖');
         background-size: cover;
     }
-    .enemy {
-        background-color: #ff0000;
-        background-image: url('https://emojicdn.elk.sh/👾');
-        background-size: cover;
-    }
     h1 {
         color: #333;
     }
@@ -60,7 +55,7 @@
 </head>
 <body>
 <h1>Maze Game</h1>
-<p>Use arrow keys to navigate. Avoid enemies and find the exit!</p>
+<p>Use arrow keys to navigate. Find the exit!</p>
 <div class="maze-container">
     <div class="maze" id="maze"></div>
 </div>
@@ -68,12 +63,9 @@
 <script>
     const ROWS = 20;
     const COLS = 20;
-    const NUM_ENEMIES = 5;
-    const WALL_DENSITY = 0.3;
 
     let maze = [];
     let playerPos = { row: 0, col: 0 };
-    let enemies = [];
     let startTime;
 
     function createMaze() {
@@ -109,13 +101,6 @@
         // Set player position
         maze[playerPos.row][playerPos.col].classList.add("player");
 
-        // Create enemies
-        for (let i = 0; i < NUM_ENEMIES; i++) {
-            let enemy = { row: Math.floor(Math.random() * ROWS), col: Math.floor(Math.random() * COLS) };
-            enemies.push(enemy);
-            maze[enemy.row][enemy.col].classList.add("enemy");
-        }
-
         // Start the timer
         startTime = Date.now();
         updateTimer();
@@ -145,22 +130,6 @@
         return directions;
     }
 
-    function moveEnemies() {
-        for (let enemy of enemies) {
-            let newRow = enemy.row + Math.floor(Math.random() * 3) - 1;
-            let newCol = enemy.col + Math.floor(Math.random() * 3) - 1;
-
-            if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS &&
-                !maze[newRow][newCol].classList.contains("wall") &&
-                !maze[newRow][newCol].classList.contains("enemy")) {
-                maze[enemy.row][enemy.col].classList.remove("enemy");
-                enemy.row = newRow;
-                enemy.col = newCol;
-                maze[enemy.row][enemy.col].classList.add("enemy");
-            }
-        }
-    }
-
     function movePlayer(direction) {
         let newRow = playerPos.row;
         let newCol = playerPos.col;
@@ -181,8 +150,7 @@
         }
 
         if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS &&
-            !maze[newRow][newCol].classList.contains("wall") &&
-            !maze[newRow][newCol].classList.contains("enemy")) {
+            !maze[newRow][newCol].classList.contains("wall")) {
             maze[playerPos.row][playerPos.col].classList.remove("player");
             playerPos.row = newRow;
             playerPos.col = newCol;
@@ -213,7 +181,6 @@
     function resetGame() {
         maze = [];
         playerPos = { row: 0, col: 0 };
-        enemies = [];
         document.getElementById("maze").innerHTML = "";
         document.getElementById("timer").textContent = "Time: 00:00";
         createMaze();
@@ -223,19 +190,15 @@
         switch (event.key) {
             case "ArrowUp":
                 movePlayer("up");
-                moveEnemies();
                 break;
             case "ArrowDown":
                 movePlayer("down");
-                moveEnemies();
                 break;
             case "ArrowLeft":
                 movePlayer("left");
-                moveEnemies();
                 break;
             case "ArrowRight":
                 movePlayer("right");
-                moveEnemies();
                 break;
         }
     });

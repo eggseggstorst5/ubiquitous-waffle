@@ -46,6 +46,7 @@
 
         // Set initial position and rotation of the car
         car.position.z = -50;
+        let velocity = 0;
 
         // Set initial camera position
         camera.position.set(0, 10, 0);
@@ -75,14 +76,12 @@
 
             // Update car position and rotation based on key state
             if (keys['ArrowUp']) {
-                const angle = car.rotation.y;
-                car.position.z -= Math.cos(angle) * 0.1;
-                car.position.x -= Math.sin(angle) * 0.1;
+                velocity += 0.01; // Accelerate when the up arrow is pressed
+            } else {
+                velocity *= 0.98; // Apply friction when no keys are pressed
             }
             if (keys['ArrowDown']) {
-                const angle = car.rotation.y;
-                car.position.z += Math.cos(angle) * 0.1;
-                car.position.x += Math.sin(angle) * 0.1;
+                velocity -= 0.005; // Slow down when the down arrow is pressed
             }
             if (keys['ArrowLeft']) {
                 car.rotation.y += 0.05;
@@ -91,11 +90,22 @@
                 car.rotation.y -= 0.05;
             }
 
-            // Prevent the car from going out of bounds
-            const maxX = 10;
-            const maxZ = 50;
-            car.position.x = Math.min(Math.max(car.position.x, -maxX), maxX);
-            car.position.z = Math.min(Math.max(car.position.z, -trackLength * 2), maxZ);
+            // Limit car's speed
+            velocity = Math.min(Math.max(velocity, 0), 0.2);
+
+            // Update car position based on velocity and rotation
+            car.position.z -= velocity * Math.cos(car.rotation.y);
+            car.position.x -= velocity * Math.sin(car.rotation.y);
+
+            // Prevent the car from going out of bounds (track boundaries)
+            const trackBounds = {
+                minX: -20,
+                maxX: 20,
+                minZ: -trackLength * 2,
+                maxZ: 0
+            };
+            car.position.x = Math.min(Math.max(car.position.x, trackBounds.minX), trackBounds.maxX);
+            car.position.z = Math.min(Math.max(car.position.z, trackBounds.minZ), trackBounds.maxZ);
 
             // Update camera position to follow the car
             camera.position.z = car.position.z + 10;
@@ -110,4 +120,3 @@
     </script>
 </body>
 </html>
-

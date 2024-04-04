@@ -44,7 +44,7 @@
         const car = new THREE.Mesh(geometry, material);
         scene.add(car);
 
-        // Set initial position of the car
+        // Set initial position and rotation of the car
         car.position.z = -5;
 
         // Set initial camera position
@@ -73,7 +73,7 @@
         const update = () => {
             requestAnimationFrame(update);
 
-            // Update car position based on key state
+            // Update car position and rotation based on key state
             if (keys['ArrowUp']) {
                 car.position.z -= 0.1;
             }
@@ -81,10 +81,10 @@
                 car.position.z += 0.1;
             }
             if (keys['ArrowLeft']) {
-                car.position.x -= 0.1;
+                car.rotation.y += 0.05;
             }
             if (keys['ArrowRight']) {
-                car.position.x += 0.1;
+                car.rotation.y -= 0.05;
             }
 
             // Prevent the car from going out of bounds
@@ -106,4 +106,3 @@
     </script>
 </body>
 </html>
-

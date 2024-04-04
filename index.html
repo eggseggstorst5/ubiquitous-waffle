@@ -1,1 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minesweeper</title>
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(10, 30px);
+    grid-template-rows: repeat(10, 30px);
+    gap: 1px;
+  }
+  .cell {
+    background-color: #ccc;
+    border: 1px solid #999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .cell:hover {
+    background-color: #ddd;
+  }
+</style>
+</head>
+<body>
+<div class="grid" id="grid"></div>
+
+<script>
+  const grid = document.getElementById('grid');
+  const rows = 10;
+  const cols = 10;
+  const mines = 20;
+
+  let board = [];
+
+  function initializeBoard() {
+    for (let i = 0; i < rows; i++) {
+      board[i] = [];
+      for (let j = 0; j < cols; j++) {
+        board[i][j] = {
+          isMine: false,
+          isOpen: false,
+          count: 0
+        };
+      }
+    }
+    // Place mines randomly
+    for (let i = 0; i < mines; i++) {
+      let row, col;
+      do {
+        row = Math.floor(Math.random() * rows);
+        col = Math.floor(Math.random() * cols);
+      } while (board[row][col].isMine);
+      board[row][col].isMine = true;
+    }
+    // Calculate counts
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        if (!board[i][j].isMine) {
+          let count = 0;
+          for (let x = -1; x <= 1; x++) {
+            for (let y = -1; y <= 1; y++) {
+              const newRow = i + x;
+              const newCol = j + y;
+              if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && board[newRow][newCol].isMine) {
+                count++;
+              }
+            }
+          }
+          board[i][j].count = count;
+        }
+      }
+    }
+  }
+
+  function renderBoard() {
+    grid.innerHTML = '';
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.row = i;
+        cell.dataset.col = j;
+        cell.addEventListener('click', handleClick);
+        grid.appendChild(cell);
+      }
+    }
+  }
+
+  function handleClick(event) {
+    const row = parseInt(event.target.dataset.row);
+    const col = parseInt(event.target.dataset.col);
+    if (!board[row][col].isOpen) {
+      board[row][col].isOpen = true;
+      if (board[row][col].isMine) {
+        revealBoard();
+        alert('Game Over!');
+      } else {
+        if (board[row][col].count === 0) {
+          expand(row, col);
+        }
+        renderCell(row, col);
+        checkWin();
+      }
+    }
+  }
+
+  function renderCell(row, col) {
+    const cell = grid.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+    cell.textContent = board[row][col].count === 0 ? '' : board[row][col].count;
+    cell.style.backgroundColor = '#fff';
+  }
+
+  function expand(row, col) {
+    for (let x = -1; x <= 1; x++) {
+      for (let y = -1; y <= 1; y++) {
+        const newRow = row + x;
+        const newCol = col + y;
+        if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && !board[newRow][newCol].isOpen) {
+          board[newRow][newCol].isOpen = true;
+          renderCell(newRow, newCol);
+          if (board[newRow][newCol].count === 0) {
+            expand(newRow, newCol);
+          }
+        }
+      }
+    }
+  }
+
+  function revealBoard() {
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        if (board[i][j].isMine) {
+          renderCell(i, j);
+        }
+      }
+    }
+  }
+
+  function checkWin() {
+    let count = 0;
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < cols; j++) {
+        if (!board[i][j].isMine && board[i][j].isOpen) {
+          count++;
+        }
+      }
+    }
+    if (count === rows * cols - mines) {
+      revealBoard();
+      alert('You Win!');
+    }
+  }
+
+  initializeBoard();
+  renderBoard();
+</script>
+</body>
+</html>
 

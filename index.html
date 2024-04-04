@@ -1,165 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Doom-like Shooter</title>
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maze Game</title>
+<style>
     body {
-      margin: 0;
-      overflow: hidden;
+        font-family: Arial, sans-serif;
+        text-align: center;
     }
-    canvas {
-      display: block;
+    .maze {
+        display: inline-block;
+        border: 2px solid black;
     }
-  </style>
+    .cell {
+        width: 40px;
+        height: 40px;
+        border: 1px solid black;
+        display: inline-block;
+        background-color: white;
+    }
+    .player {
+        background-color: yellow;
+    }
+    .wall {
+        background-color: gray;
+    }
+    .exit {
+        background-color: green;
+    }
+</style>
 </head>
 <body>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
+<div class="maze" id="maze"></div>
+<script>
+    const ROWS = 10;
+    const COLS = 10;
+    const WALL_DENSITY = 0.2;
 
-  <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    let maze = [];
+    let playerPos = { row: 0, col: 0 };
 
-    // Player properties
-    let player = {
-      x: canvas.width / 2,
-      y: canvas.height / 2,
-      radius: 15,
-      speed: 5,
-      score: 0
-    };
-
-    // Enemy properties
-    let enemies = [];
-    let enemyCount = 5;
-    let level = 1;
-
-    // Game state
-    let gameOver = false;
-
-    // Handle keyboard input
-    const keys = {};
-    window.addEventListener('keydown', e => {
-      keys[e.key] = true;
-    });
-    window.addEventListener('keyup', e => {
-      keys[e.key] = false;
-    });
-
-    // Update game state
-    function update() {
-      if (gameOver) return; // Stop the game loop if game over
-
-      // Move player
-      if (keys['ArrowLeft'] && player.x > player.radius) {
-        player.x -= player.speed;
-      }
-      if (keys['ArrowRight'] && player.x < canvas.width - player.radius) {
-        player.x += player.speed;
-      }
-      if (keys['ArrowUp'] && player.y > player.radius) {
-        player.y -= player.speed;
-      }
-      if (keys['ArrowDown'] && player.y < canvas.height - player.radius) {
-        player.y += player.speed;
-      }
-
-      // Move enemies
-      enemies.forEach(enemy => {
-        // Move randomly
-        enemy.x += (Math.random() - 0.5) * enemy.speed;
-        enemy.y += (Math.random() - 0.5) * enemy.speed;
-        
-        // Keep enemies within canvas boundaries
-        if (enemy.x < 0) enemy.x = 0;
-        if (enemy.y < 0) enemy.y = 0;
-        if (enemy.x > canvas.width) enemy.x = canvas.width;
-        if (enemy.y > canvas.height) enemy.y = canvas.height;
-      });
-
-      // Check for collisions with enemies
-      enemies.forEach((enemy, index) => {
-        const dx = player.x - enemy.x;
-        const dy = player.y - enemy.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < player.radius + enemy.radius) {
-          // Player collided with an enemy
-          gameOver = true;
-          endGame();
+    function createMaze() {
+        let mazeDiv = document.getElementById("maze");
+        for (let i = 0; i < ROWS; i++) {
+            let row = [];
+            for (let j = 0; j < COLS; j++) {
+                let cellDiv = document.createElement("div");
+                cellDiv.classList.add("cell");
+                if (Math.random() < WALL_DENSITY) {
+                    cellDiv.classList.add("wall");
+                }
+                mazeDiv.appendChild(cellDiv);
+                row.push(cellDiv);
+            }
+            maze.push(row);
+            mazeDiv.appendChild(document.createElement("br"));
         }
-      });
 
-      // Increase score for surviving
-      player.score += 0.1;
+        // Set exit
+        let exitRow = Math.floor(Math.random() * ROWS);
+        let exitCol = Math.floor(Math.random() * COLS);
+        maze[exitRow][exitCol].classList.add("exit");
 
-      // Check if all enemies are destroyed
-      if (enemies.length === 0) {
-        nextLevel();
-      }
-
-      // Redraw canvas
-      draw();
-
-      // Call update again
-      requestAnimationFrame(update);
+        // Set player position
+        maze[playerPos.row][playerPos.col].classList.add("player");
     }
 
-    // Draw everything
-    function draw() {
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function movePlayer(direction) {
+        let newRow = playerPos.row;
+        let newCol = playerPos.col;
 
-      // Draw player
-      ctx.fillStyle = 'blue';
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-      ctx.fill();
+        switch (direction) {
+            case "up":
+                newRow--;
+                break;
+            case "down":
+                newRow++;
+                break;
+            case "left":
+                newCol--;
+                break;
+            case "right":
+                newCol++;
+                break;
+        }
 
-      // Draw enemies
-      ctx.fillStyle = 'red';
-      enemies.forEach(enemy => {
-        ctx.beginPath();
-        ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
-        ctx.fill();
-      });
+        if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS &&
+            !maze[newRow][newCol].classList.contains("wall")) {
+            maze[playerPos.row][playerPos.col].classList.remove("player");
+            playerPos.row = newRow;
+            playerPos.col = newCol;
+            maze[playerPos.row][playerPos.col].classList.add("player");
 
-      // Draw score
-      ctx.fillStyle = 'black';
-      ctx.font = '24px Arial';
-      ctx.fillText(`Score: ${Math.floor(player.score)}`, 20, 40);
+            if (maze[playerPos.row][playerPos.col].classList.contains("exit")) {
+                alert("Congratulations! You found the exit!");
+                resetGame();
+            }
+        }
     }
 
-    // End game function
-    function endGame() {
-      alert(`Game Over! Your Score: ${Math.floor(player.score)}`);
+    function resetGame() {
+        maze = [];
+        playerPos = { row: 0, col: 0 };
+        document.getElementById("maze").innerHTML = "";
+        createMaze();
     }
 
-    // Next level function
-    function nextLevel() {
-      level++;
-      enemyCount += 2;
-      player.score += 100; // Bonus score for completing level
-      createEnemies();
-    }
+    document.addEventListener("keydown", function(event) {
+        switch (event.key) {
+            case "ArrowUp":
+                movePlayer("up");
+                break;
+            case "ArrowDown":
+                movePlayer("down");
+                break;
+            case "ArrowLeft":
+                movePlayer("left");
+                break;
+            case "ArrowRight":
+                movePlayer("right");
+                break;
+        }
+    });
 
-    // Create initial enemies
-    function createEnemies() {
-      enemies = [];
-      for (let i = 0; i < enemyCount; i++) {
-        const enemy = {
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          radius: 10 + level,
-          speed: 1 + level * 0.5 // Adjust speed as needed
-        };
-        enemies.push(enemy);
-      }
-    }
-    createEnemies();
-
-    // Start the game loop
-    update();
-  </script>
+    createMaze();
+</script>
 </body>
 </html>

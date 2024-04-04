@@ -56,16 +56,25 @@ h1 {
   box-shadow: 0px 0px 10px 0px #000;
   max-width: 380px;
 }
+
+.game-over-message {
+  text-align: center;
+  font-size: 24px;
+  color: #ff4136;
+  margin-top: 20px;
+}
 </style>
 </head>
 <body>
 <div class="container">
   <h1>Minesweeper</h1>
   <div class="grid" id="grid"></div>
+  <div class="game-over-message" id="game-over-message"></div>
 </div>
 
 <script>
 const grid = document.getElementById('grid');
+const gameOverMessage = document.getElementById('game-over-message');
 const rows = 10;
 const cols = 10;
 const mines = 20;
@@ -133,8 +142,8 @@ function handleClick(event) {
     board[row][col].isOpen = true;
     if (board[row][col].isMine) {
       revealBoard();
-      alert('Game Over!');
-      location.reload(); // Reload the page
+      gameOverMessage.textContent = 'Game Over!';
+      gameOverMessage.style.display = 'block';
     } else {
       if (board[row][col].count === 0) {
         expand(row, col);
@@ -192,7 +201,8 @@ function checkWin() {
   }
   if (count === rows * cols - mines) {
     revealBoard();
-    alert('You Win!');
+    gameOverMessage.textContent = 'You Win!';
+    gameOverMessage.style.display = 'block';
   }
 }
 

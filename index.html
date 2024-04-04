@@ -44,10 +44,13 @@
         }
         scene.add(track);
 
+        // Load car texture
+        const carTexture = textureLoader.load('https://threejs.org/examples/textures/uv_grid_opengl.jpg');
+        const carMaterial = new THREE.MeshBasicMaterial({ map: carTexture });
+
         // Create a car mesh
         const geometry = new THREE.BoxGeometry(1, 0.5, 2);
-        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const car = new THREE.Mesh(geometry, material);
+        const car = new THREE.Mesh(geometry, carMaterial);
         scene.add(car);
 
         // Set initial position and rotation of the car
@@ -126,4 +129,3 @@
     </script>
 </body>
 </html>
-

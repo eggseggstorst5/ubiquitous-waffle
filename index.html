@@ -26,11 +26,14 @@
       x: canvas.width / 2,
       y: canvas.height / 2,
       radius: 15,
-      speed: 5
+      speed: 5,
+      score: 0
     };
 
     // Enemy properties
     let enemies = [];
+    let enemyCount = 5;
+    let level = 1;
 
     // Game state
     let gameOver = false;
@@ -87,6 +90,14 @@
         }
       });
 
+      // Increase score for surviving
+      player.score += 0.1;
+
+      // Check if all enemies are destroyed
+      if (enemies.length === 0) {
+        nextLevel();
+      }
+
       // Redraw canvas
       draw();
 
@@ -112,21 +123,35 @@
         ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
         ctx.fill();
       });
+
+      // Draw score
+      ctx.fillStyle = 'black';
+      ctx.font = '24px Arial';
+      ctx.fillText(`Score: ${Math.floor(player.score)}`, 20, 40);
     }
 
     // End game function
     function endGame() {
-      alert('Game Over!');
+      alert(`Game Over! Your Score: ${Math.floor(player.score)}`);
+    }
+
+    // Next level function
+    function nextLevel() {
+      level++;
+      enemyCount += 2;
+      player.score += 100; // Bonus score for completing level
+      createEnemies();
     }
 
     // Create initial enemies
     function createEnemies() {
-      for (let i = 0; i < 5; i++) {
+      enemies = [];
+      for (let i = 0; i < enemyCount; i++) {
         const enemy = {
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          radius: 10,
-          speed: 2 // Adjust speed as needed
+          radius: 10 + level,
+          speed: 1 + level * 0.5 // Adjust speed as needed
         };
         enemies.push(enemy);
       }

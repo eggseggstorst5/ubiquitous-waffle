@@ -40,6 +40,11 @@
         background-image: url('https://emojicdn.elk.sh/🤖');
         background-size: cover;
     }
+    .obstacle {
+        background-color: #ff0000;
+        background-image: url('https://emojicdn.elk.sh/🚧');
+        background-size: cover;
+    }
     h1 {
         color: #333;
     }
@@ -51,7 +56,7 @@
 </head>
 <body>
 <h1>Maze Game</h1>
-<p>Use arrow keys to navigate. Find the exit!</p>
+<p>Use arrow keys to navigate. Avoid moving obstacles and find the exit!</p>
 <div class="maze-container">
     <div class="maze" id="maze"></div>
 </div>
@@ -59,9 +64,12 @@
     const ROWS = 15;
     const COLS = 15;
     const WALL_DENSITY = 0.2;
+    const NUM_OBSTACLES = 5;
+    const OBSTACLE_INTERVAL = 1000;
 
     let maze = [];
     let playerPos = { row: 0, col: 0 };
+    let obstacles = [];
 
     function createMaze() {
         let mazeDiv = document.getElementById("maze");
@@ -84,6 +92,46 @@
 
         // Set player position
         maze[playerPos.row][playerPos.col].classList.add("player");
+
+        // Create obstacles
+        for (let i = 0; i < NUM_OBSTACLES; i++) {
+            let obstacle = { row: Math.floor(Math.random() * ROWS), col: Math.floor(Math.random() * COLS) };
+            obstacles.push(obstacle);
+            maze[obstacle.row][obstacle.col].classList.add("obstacle");
+        }
+    }
+
+    function moveObstacles() {
+        for (let obstacle of obstacles) {
+            let newRow = obstacle.row;
+            let newCol = obstacle.col;
+            let directions = ["up", "down", "left", "right"];
+            let direction = directions[Math.floor(Math.random() * directions.length)];
+
+            switch (direction) {
+                case "up":
+                    newRow--;
+                    break;
+                case "down":
+                    newRow++;
+                    break;
+                case "left":
+                    newCol--;
+                    break;
+                case "right":
+                    newCol++;
+                    break;
+            }
+
+            if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS &&
+                !maze[newRow][newCol].classList.contains("wall") &&
+                !maze[newRow][newCol].classList.contains("obstacle")) {
+                maze[obstacle.row][obstacle.col].classList.remove("obstacle");
+                obstacle.row = newRow;
+                obstacle.col = newCol;
+                maze[obstacle.row][obstacle.col].classList.add("obstacle");
+            }
+        }
     }
 
     function movePlayer(direction) {
@@ -106,7 +154,8 @@
         }
 
         if (newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS &&
-            !maze[newRow][newCol].classList.contains("wall")) {
+            !maze[newRow][newCol].classList.contains("wall") &&
+            !maze[newRow][newCol].classList.contains("obstacle")) {
             maze[playerPos.row][playerPos.col].classList.remove("player");
             playerPos.row = newRow;
             playerPos.col = newCol;
@@ -122,6 +171,7 @@
     function resetGame() {
         maze = [];
         playerPos = { row: 0, col: 0 };
+        obstacles = [];
         document.getElementById("maze").innerHTML = "";
         createMaze();
     }
@@ -144,6 +194,7 @@
     });
 
     createMaze();
+    setInterval(moveObstacles, OBSTACLE_INTERVAL);
 </script>
 </body>
 </html>

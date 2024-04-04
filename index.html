@@ -102,6 +102,7 @@
       if (board[row][col].isMine) {
         revealBoard();
         alert('Game Over!');
+        location.reload(); // Reload the page
       } else {
         if (board[row][col].count === 0) {
           expand(row, col);

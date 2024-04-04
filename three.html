@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Platformer Game</title>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Set up Three.js scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Create a platform
+        const platformGeometry = new THREE.BoxGeometry(10, 1, 10);
+        const platformMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const platform = new THREE.Mesh(platformGeometry, platformMaterial);
+        scene.add(platform);
+
+        // Create a character
+        const characterGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const characterMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const character = new THREE.Mesh(characterGeometry, characterMaterial);
+        character.position.y = 5; // Start the character above the platform
+        scene.add(character);
+
+        // Movement controls
+        const speed = 0.1;
+        const gravity = 0.01;
+        let velocityY = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Move character left or right
+            if (Key.isDown(Key.LEFT)) {
+                character.position.x -= speed;
+            }
+            if (Key.isDown(Key.RIGHT)) {
+                character.position.x += speed;
+            }
+
+            // Jumping
+            if (Key.isDown(Key.UP) && character.position.y <= 1.5) { // Only jump when character is on the platform
+                velocityY = 0.3;
+            }
+
+            // Apply gravity
+            velocityY -= gravity;
+            character.position.y += velocityY;
+
+            // Collision detection
+            if (character.position.y <= 1.5) { // Character is on the platform
+                character.position.y = 1.5;
+                velocityY = 0;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Key handling
+        const Key = {
+            _pressed: {},
+
+            LEFT: 37,
+            UP: 38,
+            RIGHT: 39,
+
+            isDown: function(keyCode) {
+                return this._pressed[keyCode];
+            },
+
+            onKeyDown: function(event) {
+                this._pressed[event.keyCode] = true;
+            },
+
+            onKeyUp: function(event) {
+                delete this._pressed[event.keyCode];
+            }
+        };
+
+        window.addEventListener('keydown', function(event) { Key.onKeyDown(event); }, false);
+        window.addEventListener('keyup', function(event) { Key.onKeyUp(event); }, false);
+    </script>
+</body>
+</html>

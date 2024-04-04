@@ -59,8 +59,15 @@
 
       // Move enemies
       enemies.forEach(enemy => {
-        enemy.x += (player.x - enemy.x) * 0.01;
-        enemy.y += (player.y - enemy.y) * 0.01;
+        // Move randomly
+        enemy.x += (Math.random() - 0.5) * enemy.speed;
+        enemy.y += (Math.random() - 0.5) * enemy.speed;
+        
+        // Keep enemies within canvas boundaries
+        if (enemy.x < 0) enemy.x = 0;
+        if (enemy.y < 0) enemy.y = 0;
+        if (enemy.x > canvas.width) enemy.x = canvas.width;
+        if (enemy.y > canvas.height) enemy.y = canvas.height;
       });
 
       // Check for collisions with enemies
@@ -113,7 +120,8 @@
         const enemy = {
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          radius: 10
+          radius: 10,
+          speed: 2 // Adjust speed as needed
         };
         enemies.push(enemy);
       }

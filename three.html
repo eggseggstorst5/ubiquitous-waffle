@@ -19,15 +19,20 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
+        // Texture loading
+        const textureLoader = new THREE.TextureLoader();
+        const platformTexture = textureLoader.load('https://threejs.org/examples/textures/wood.jpg');
+        const characterTexture = textureLoader.load('https://threejs.org/examples/textures/uv_grid_opengl.jpg');
+
         // Create a platform
         const platformGeometry = new THREE.BoxGeometry(10, 1, 10);
-        const platformMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const platformMaterial = new THREE.MeshBasicMaterial({ map: platformTexture });
         const platform = new THREE.Mesh(platformGeometry, platformMaterial);
         scene.add(platform);
 
         // Create a character
         const characterGeometry = new THREE.BoxGeometry(1, 1, 1);
-        const characterMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        const characterMaterial = new THREE.MeshBasicMaterial({ map: characterTexture });
         const character = new THREE.Mesh(characterGeometry, characterMaterial);
         character.position.y = 5; // Start the character above the platform
         scene.add(character);

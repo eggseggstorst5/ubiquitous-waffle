@@ -18,9 +18,10 @@
     }
     .maze {
         display: grid;
-        grid-template-columns: repeat(10, 40px);
-        grid-template-rows: repeat(10, 40px);
+        grid-template-columns: repeat(15, 30px);
+        grid-template-rows: repeat(15, 30px);
         gap: 1px;
+        border: 2px solid #333;
     }
     .cell {
         background-color: #c0c0c0;
@@ -55,8 +56,8 @@
     <div class="maze" id="maze"></div>
 </div>
 <script>
-    const ROWS = 10;
-    const COLS = 10;
+    const ROWS = 15;
+    const COLS = 15;
     const WALL_DENSITY = 0.2;
 
     let maze = [];
@@ -79,9 +80,7 @@
         }
 
         // Set exit
-        let exitRow = Math.floor(Math.random() * ROWS);
-        let exitCol = Math.floor(Math.random() * COLS);
-        maze[exitRow][exitCol].classList.add("exit");
+        maze[ROWS - 1][COLS - 1].classList.add("exit");
 
         // Set player position
         maze[playerPos.row][playerPos.col].classList.add("player");

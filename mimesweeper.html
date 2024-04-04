@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minesweeper</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background-color: #c0c0c0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.grid {
+  display: grid;
+  gap: 1px;
+  border: 2px solid #000;
+  background-color: #808080;
+  padding: 10px;
+}
+
+.cell {
+  background-color: #c0c0c0;
+  border: 1px solid #999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.cell:hover {
+  background-color: #ddd;
+}
+
+.mine {
+  background-color: #ff4136;
+  color: #fff;
+}
+
+h1 {
+  text-align: center;
+}
+
+.container {
+  background-color: #808080;
+  padding: 20px;
+  border: 2px solid #000;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px 0px #000;
+  max-width: 500px;
+}
+
+.game-over-message {
+  text-align: center;
+  font-size: 24px;
+  color: #ff4136;
+  margin-top: 20px;
+}
+
+.restart-button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.restart-button:hover {
+  background-color: #45a049;
+}
+
+.resize-button {
+  display: block;
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.resize-button:hover {
+  background-color: #45a049;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.input-field {
+  width: 100px;
+  padding: 5px;
+  border: 1px solid #999;
+  border-radius: 5px;
+}
+
+.input-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.input-button:hover {
+  background-color: #45a049;
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Minesweeper</h1>
+  <div class="grid" id="grid"></div>
+  <div class="game-over-message" id="game-over-message"></div>
+  <button class="restart-button" id="restart-button">Restart</button>
+  <button class="resize-button" id="resize-button">Resize</button>
+  <div>
+    <label for="bomb-input" class="input-label">Number of Bombs:</label>
+    <input type="number" id="bomb-input" class="input-field" value="20">
+    <button class="input-button" id="set-bombs">Set Bombs</button>
+  </div>
+</div>
+
+<script>
+const grid = document.getElementById('grid');
+const gameOverMessage = document.getElementById('game-over-message');
+const restartButton = document.getElementById('restart-button');
+const resizeButton = document.getElementById('resize-button');
+const bombInput = document.getElementById('bomb-input');
+const setBombsButton = document.getElementById('set-bombs');
+let rows = 10;
+let cols = 10;
+let mines = 20;
+
+let board = [];
+
+function initializeBoard() {
+  for (let i = 0; i < rows; i++) {
+    board[i] = [];
+    for (let j = 0; j < cols; j++) {
+      board[i][j] = {
+        isMine: false,
+        isOpen: false,
+        count: 0
+      };
+    }
+  }
+  // Place mines randomly
+  for (let i = 0; i < mines; i++) {
+    let row, col;
+    do {
+      row = Math.floor(Math.random() * rows);
+      col = Math.floor(Math.random() * cols);
+    } while (board[row][col].isMine);
+    board[row][col].isMine = true;
+  }
+  // Calculate counts
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (!board[i][j].isMine) {
+        let count = 0;
+        for (let x = -1; x <= 1; x++) {
+          for (let y = -1; y <= 1; y++) {
+            const newRow = i + x;
+            const newCol = j + y;
+            if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && board[newRow][newCol].isMine) {
+              count++;
+            }
+          }
+        }
+        board[i][j].count = count;
+      }
+    }
+  }
+}
+
+function renderBoard() {
+  grid.innerHTML = '';
+  grid.style.gridTemplateColumns = `repeat(${cols}, 30px)`;
+  grid.style.gridTemplateRows = `repeat(${rows}, 30px)`;
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.dataset.row = i;
+      cell.dataset.col = j;
+      cell.addEventListener('click', handleClick);
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function handleClick(event) {
+  const row = parseInt(event.target.dataset.row);
+  const col = parseInt(event.target.dataset.col);
+  if (!board[row][col].isOpen) {
+    board[row][col].isOpen = true;
+    if (board[row][col].isMine) {
+      revealBoard();
+      gameOverMessage.textContent = 'Game Over!';
+      gameOverMessage.style.display = 'block';
+      restartButton.style.display = 'block';
+    } else {
+      if (board[row][col].count === 0) {
+        expand(row, col);
+      }
+      renderCell(row, col);
+      checkWin();
+    }
+  }
+}
+
+function renderCell(row, col) {
+  const cell = grid.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+  cell.textContent = board[row][col].count === 0 ? '' : board[row][col].count;
+  cell.style.backgroundColor = '#fff';
+  if (board[row][col].isMine) {
+    cell.classList.add('mine');
+    cell.innerHTML = '&#128163;'; // Bomb emoji
+  }
+}
+
+function expand(row, col) {
+  for (let x = -1; x <= 1; x++) {
+    for (let y = -1; y <= 1; y++) {
+      const newRow = row + x;
+      const newCol = col + y;
+      if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols && !board[newRow][newCol].isOpen) {
+        board[newRow][newCol].isOpen = true;
+        renderCell(newRow, newCol);
+        if (board[newRow][newCol].count === 0) {
+          expand(newRow, newCol);
+        }
+      }
+    }
+  }
+}
+
+function revealBoard() {
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (board[i][j].isMine) {
+        renderCell(i, j);
+      }
+    }
+  }
+}
+
+function checkWin() {
+  let count = 0;
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (!board[i][j].isMine && board[i][j].isOpen) {
+        count++;
+      }
+    }
+  }
+  if (count === rows * cols - mines) {
+    revealBoard();
+    gameOverMessage.textContent = 'You Win!';
+    gameOverMessage.style.display = 'block';
+    restartButton.style.display = 'block';
+  }
+}
+
+function restartGame() {
+  initializeBoard();
+  renderBoard();
+  gameOverMessage.style.display = 'none';
+  restartButton.style.display = 'none';
+}
+
+function resizeGrid() {
+  const newSize = parseInt(prompt("Enter the new size (e.g., 10 for a 10x10 grid):"));
+  if (!isNaN(newSize) && newSize > 0) {
+    rows = newSize;
+    cols = newSize;
+    restartGame();
+  } else {
+    alert("Please enter a valid size.");
+  }
+}
+
+function setBombs() {
+  const newBombCount = parseInt(bombInput.value);
+  if (!isNaN(newBombCount) && newBombCount >= 0 && newBombCount <= rows * cols - 1) {
+    mines = newBombCount;
+    restartGame();
+  } else {
+    alert("Please enter a valid number of bombs.");
+  }
+}
+
+restartButton.addEventListener('click', restartGame);
+resizeButton.addEventListener('click', resizeGrid);
+setBombsButton.addEventListener('click', setBombs);
+
+initializeBoard();
+renderBoard();
+</script>
+</body>
+</html>

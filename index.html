@@ -41,6 +41,13 @@
             const road = new THREE.Mesh(roadGeometry, roadMaterial);
             road.position.z = -i * 2;
             track.add(road);
+
+            // Add street lights
+            if (i % 40 === 0) { // Place street lights at regular intervals
+                const streetLight = new THREE.PointLight(0xffffff, 1, 10);
+                streetLight.position.set(-5, 5, -i * 2); // Adjust the position as needed
+                scene.add(streetLight);
+            }
         }
         scene.add(track);
 

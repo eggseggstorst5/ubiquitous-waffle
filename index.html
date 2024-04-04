@@ -3,86 +3,125 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simple Driving Game</title>
+<title>Realistic Driving Game</title>
 <style>
     body {
         font-family: Arial, sans-serif;
         text-align: center;
     }
-    #road {
-        width: 200px;
-        height: 30px;
-        background-color: lightgray;
-        position: relative;
+    #game-container {
+        width: 400px;
         margin: 20px auto;
     }
-    #car {
-        width: 20px;
-        height: 30px;
-        background-color: red;
+    .road {
+        width: 100%;
+        height: 400px;
+        border: 2px solid black;
+        position: relative;
+        overflow: hidden;
+    }
+    .lane {
+        width: 100%;
+        height: 80px;
+        position: absolute;
+        border-bottom: 1px solid white;
+    }
+    .car {
+        width: 50px;
+        height: 80px;
+        background: url('https://i.pngimg.me/thumb/f/720/m2i8H7b1A0N4b1d3.jpg') no-repeat center;
+        background-size: cover;
         position: absolute;
         bottom: 0;
-        left: 90px;
+        transition: left 0.3s ease-in-out;
     }
-    #obstacle {
-        width: 20px;
-        height: 20px;
-        background-color: black;
+    .obstacle {
+        width: 50px;
+        height: 50px;
+        background: url('https://as2.ftcdn.net/v2/jpg/05/65/80/33/1000_F_565803372_MnPpc72LIOu5vFmDZ9cAwnrYS5lbjTs0.webp') no-repeat center;
+        background-size: cover;
         position: absolute;
-        top: 0;
-        left: 0;
-        display: none;
+        top: -50px;
+        transition: top 3s linear;
+    }
+    #score {
+        font-size: 24px;
+        margin-top: 10px;
     }
 </style>
 </head>
 <body>
-<h1>Simple Driving Game</h1>
-<div id="road">
-    <div id="car"></div>
-    <div id="obstacle"></div>
+<h1>Realistic Driving Game</h1>
+<div id="game-container">
+    <div class="road">
+        <div class="lane" style="top: 0;"></div>
+        <div class="lane" style="top: 80px;"></div>
+        <div class="lane" style="top: 160px;"></div>
+        <div class="lane" style="top: 240px;"></div>
+        <div class="lane" style="top: 320px;"></div>
+        <div class="car" id="car"></div>
+        <div class="obstacle" id="obstacle"></div>
+    </div>
+    <p id="score">Score: <span id="score-value">0</span></p>
+    <button onclick="startGame()">Start</button>
 </div>
-<p>Score: <span id="score">0</span></p>
-<button onclick="startGame()">Start</button>
+
+<audio id="crash-sound">
+    <source src="https://pixabay.com/sound-effects/explosion-6801/" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
 
 <script>
-    let position = 90;
     let score = 0;
     let gameInterval;
+    let carPosition = 2; // Initial lane
     const car = document.getElementById('car');
     const obstacle = document.getElementById('obstacle');
-    const scoreDisplay = document.getElementById('score');
+    const scoreDisplay = document.getElementById('score-value');
+    const crashSound = document.getElementById('crash-sound');
 
     function startGame() {
         score = 0;
         scoreDisplay.textContent = score;
-        car.style.left = '90px';
-        position = 90;
-        gameInterval = setInterval(moveObstacle, 500);
+        car.style.left = `${carPosition * 80}px`;
+        obstacle.style.top = '-50px';
+        gameInterval = setInterval(moveObstacle, 3000);
         document.addEventListener('keydown', moveCar);
     }
 
     function moveCar(event) {
-        if (event.key === 'ArrowLeft' && position > 0) {
-            position -= 10;
-        } else if (event.key === 'ArrowRight' && position < 180) {
-            position += 10;
+        if (event.key === 'ArrowLeft' && carPosition > 0) {
+            carPosition--;
+        } else if (event.key === 'ArrowRight' && carPosition < 4) {
+            carPosition++;
         }
-        car.style.left = position + 'px';
+        car.style.left = `${carPosition * 80}px`;
     }
 
     function moveObstacle() {
-        let obstaclePosition = Math.floor(Math.random() * 180);
-        obstacle.style.left = obstaclePosition + 'px';
-        obstacle.style.display = 'block';
+        let obstaclePosition = Math.floor(Math.random() * 5) * 80;
+        obstacle.style.left = `${obstaclePosition}px`;
+        obstacle.style.top = '480px';
 
-        if (obstaclePosition >= position && obstaclePosition <= position + 20) {
-            clearInterval(gameInterval);
-            document.removeEventListener('keydown', moveCar);
-            alert('Game Over! Your score: ' + score);
-        } else {
-            score++;
-            scoreDisplay.textContent = score;
-        }
+        const moveInterval = setInterval(() => {
+            let obstacleTop = parseInt(obstacle.style.top);
+            if (obstacleTop <= 80) {
+                if (obstaclePosition === carPosition * 80 && obstacleTop >= 0) {
+                    clearInterval(moveInterval);
+                    clearInterval(gameInterval);
+                    document.removeEventListener('keydown', moveCar);
+                    crashSound.play();
+                    alert('Game Over! Your score: ' + score);
+                }
+                obstacleTop = 0;
+            } else {
+                obstacleTop -= 80;
+            }
+            obstacle.style.top = `${obstacleTop}px`;
+        }, 100);
+        
+        score++;
+        scoreDisplay.textContent = score;
     }
 </script>
 </body>

@@ -36,7 +36,7 @@
         const trackLength = 500;
         const trackWidth = 20;
         const roadGeometry = new THREE.PlaneGeometry(trackWidth, 2, 1, 1);
-        const roadMaterial = new THREE.MeshBasicMaterial({ map: roadTexture });
+        const roadMaterial = new THREE.MeshBasicMaterial({ map: roadTexture, side: THREE.DoubleSide });
         for (let i = 0; i < trackLength; i++) {
             const road = new THREE.Mesh(roadGeometry, roadMaterial);
             road.position.z = -i * 2;

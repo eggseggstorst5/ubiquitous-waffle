@@ -40,12 +40,40 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
+        // Key state object to track pressed keys
+        const keys = {};
+
+        // Handle keydown and keyup events
+        window.addEventListener('keydown', (event) => {
+            keys[event.code] = true;
+        });
+        window.addEventListener('keyup', (event) => {
+            keys[event.code] = false;
+        });
+
         // Update function for rendering the scene
         const update = () => {
             requestAnimationFrame(update);
 
-            // Move the car forward
-            car.position.z += 0.1;
+            // Update car position based on key state
+            if (keys['ArrowUp']) {
+                car.position.z -= 0.1;
+            }
+            if (keys['ArrowDown']) {
+                car.position.z += 0.1;
+            }
+            if (keys['ArrowLeft']) {
+                car.position.x -= 0.1;
+            }
+            if (keys['ArrowRight']) {
+                car.position.x += 0.1;
+            }
+
+            // Prevent the car from going out of bounds
+            const maxX = 5;
+            const maxZ = 5;
+            car.position.x = Math.min(Math.max(car.position.x, -maxX), maxX);
+            car.position.z = Math.min(Math.max(car.position.z, -maxZ), maxZ);
 
             renderer.render(scene, camera);
         };

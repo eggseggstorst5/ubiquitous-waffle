@@ -18,8 +18,8 @@
     }
     .maze {
         display: grid;
-        grid-template-columns: repeat(15, 30px);
-        grid-template-rows: repeat(15, 30px);
+        grid-template-columns: repeat(20, 30px);
+        grid-template-rows: repeat(20, 30px);
         gap: 1px;
         border: 2px solid #333;
     }
@@ -52,6 +52,10 @@
         color: #666;
         margin-bottom: 20px;
     }
+    #timer {
+        font-size: 24px;
+        margin-top: 20px;
+    }
 </style>
 </head>
 <body>
@@ -60,14 +64,17 @@
 <div class="maze-container">
     <div class="maze" id="maze"></div>
 </div>
+<div id="timer">Time: 00:00</div>
 <script>
-    const ROWS = 15;
-    const COLS = 15;
-    const NUM_ENEMIES = 3;
+    const ROWS = 20;
+    const COLS = 20;
+    const NUM_ENEMIES = 5;
+    const WALL_DENSITY = 0.3;
 
     let maze = [];
     let playerPos = { row: 0, col: 0 };
     let enemies = [];
+    let startTime;
 
     function createMaze() {
         let mazeDiv = document.getElementById("maze");
@@ -108,6 +115,10 @@
             enemies.push(enemy);
             maze[enemy.row][enemy.col].classList.add("enemy");
         }
+
+        // Start the timer
+        startTime = Date.now();
+        updateTimer();
     }
 
     function recursiveBacktracking(row, col) {
@@ -178,10 +189,25 @@
             maze[playerPos.row][playerPos.col].classList.add("player");
 
             if (maze[playerPos.row][playerPos.col].classList.contains("exit")) {
-                alert("Congratulations! You found the exit!");
+                let endTime = Date.now();
+                let elapsedTime = endTime - startTime;
+                let seconds = Math.floor(elapsedTime / 1000);
+                let minutes = Math.floor(seconds / 60);
+                seconds %= 60;
+                alert("Congratulations! You found the exit!\nTime: " + minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0"));
                 resetGame();
             }
         }
+    }
+
+    function updateTimer() {
+        let currentTime = Date.now();
+        let elapsedTime = currentTime - startTime;
+        let seconds = Math.floor(elapsedTime / 1000);
+        let minutes = Math.floor(seconds / 60);
+        seconds %= 60;
+        document.getElementById("timer").textContent = "Time: " + minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
+        setTimeout(updateTimer, 1000);
     }
 
     function resetGame() {
@@ -189,6 +215,7 @@
         playerPos = { row: 0, col: 0 };
         enemies = [];
         document.getElementById("maze").innerHTML = "";
+        document.getElementById("timer").textContent = "Time: 00:00";
         createMaze();
     }
 
